@@ -1,0 +1,23 @@
+﻿@{
+    ViewData["Title"] = "Home Page";
+}
+
+
+<p>
+    <a asp-action="Registration" asp-controller="Account">Регистрация</a>
+</p>
+
+<p>
+    <a asp-action="Login" asp-controller="Account">Вход</a>
+</p>
+
+<p>
+    <a asp-action="Index" asp-controller="Test">TestAuthorize</a>
+</p>
+
+
+@if(User.Identity.IsAuthenticated)
+{
+    <p>Hello @User.Identity.Name</p>
+    <a asp-action="Logout" asp-controller="Account">Выход</a>
+}

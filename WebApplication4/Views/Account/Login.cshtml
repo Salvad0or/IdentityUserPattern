@@ -1,0 +1,30 @@
+﻿@using WebApplication4.Models.ViewModels;
+@model RegistrationUserViewModel
+@{
+    ViewData["Title"] = "Login";
+}
+
+<h1>Login</h1>
+
+<div>
+    <form asp-action="Login" asp-controller="Account">
+        <div asp-validation-summary="ModelOnly"></div>
+        
+        <div>
+            <label asp-for="Email"></label>
+            <input asp-for="Email" />
+            <span asp-validation-for="Email"></span>
+            
+        </div>
+
+        <div>
+            <label asp-for="Password"></label>
+            <input asp-for="Password" />
+            <span asp-validation-for="Password"></span>
+        </div>
+
+        <button type="submit">Войти</button>
+
+        
+    </form>
+</div>
