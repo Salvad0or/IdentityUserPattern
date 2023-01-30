@@ -6,8 +6,8 @@ namespace WebApplication4.Models
     /// Наш главный класс наследующий все классные вещи от IdentityUser.
     /// Здесь мы можем манипулировать как нам хочется
     /// </summary>
-    public class User :IdentityUser
+    public class User : IdentityUser
     {
-        public int Yearrr { get; set; }
+        public string? Roles { get; set; }
     }
 }

@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 using WebApplication4.Models;
 using WebApplication4.Models.Data;
 
@@ -32,23 +33,36 @@ builder.Services.AddIdentity<User, IdentityRole>(options =>
 #endregion
 
 #region ƒобавление куки
-builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
-                .AddCookie(options =>
-                {
-                    options.ExpireTimeSpan = TimeSpan.FromMinutes(1);
-                });
 
+///“олько так можно добавить куки когда нужно их настраивать при использовании Identity User'a
 
-//builder.Services.ConfigureApplicationCookie(options =>
-//{
-//    // Cookie settings
-//    options.Cookie.HttpOnly = true;
-//    options.ExpireTimeSpan = TimeSpan.FromMinutes(1);
+builder.Services.ConfigureApplicationCookie(options =>
+{
 
-//    options.LoginPath = "/Identity/Account/Login";
-//    options.AccessDeniedPath = "/Identity/Account/AccessDenied";
-//    options.SlidingExpiration = true;
-//});
+    // options.ExpireTimeSpan = TimeSpan.FromMinutes(1);
+    options.LoginPath = "/Account/Login";
+    options.AccessDeniedPath = "/Account/AccessDenied";
+    
+});
+
+#endregion
+
+#region ƒобавление авторизации на основне Claims
+
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("Administrator", builder =>
+    {
+        builder.RequireClaim(ClaimTypes.Role, "Administrator");
+    });
+
+    options.AddPolicy("Manager", builder =>
+    {
+        builder.RequireAssertion(x =>
+        x.User.HasClaim(ClaimTypes.Role, "Manager") || x.User.HasClaim(ClaimTypes.Role, "Administrator"));
+      
+    });
+});
 
 #endregion
 

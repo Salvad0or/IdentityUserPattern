@@ -12,6 +12,9 @@ namespace WebApplication4.Models.ViewModels
         [Display(Name ="E-mail")]
         public string Email { get; set; }
 
+        [Required(ErrorMessage = "Введите Роль")]
+        public string Roles { get; set; }
+
         [Required(ErrorMessage = "Введите пароль")]
         [Display(Name = "Пароль")]
         [DataType(DataType.Password)]

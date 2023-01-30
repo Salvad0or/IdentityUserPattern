@@ -3,11 +3,9 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace WebApplication4.Controllers
 {
-    [Authorize(Policy = "Administrator")]
-    
-    public class TestController : Controller
+    [Authorize(Policy = "Manager")]
+    public class PolicyManagerController : Controller
     {
-        [HttpGet]
         public IActionResult Index()
         {
             return View();

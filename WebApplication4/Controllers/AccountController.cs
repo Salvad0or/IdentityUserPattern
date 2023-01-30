@@ -1,5 +1,8 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 using WebApplication4.Models;
 using WebApplication4.Models.ViewModels;
 
@@ -17,6 +20,11 @@ namespace WebApplication4.Controllers
         private readonly SignInManager<User> _signInManager;
         private readonly UserManager<User> _userManager;
 
+        /// <summary>
+        /// Внедрение зависимостей важных сервисов Identity
+        /// </summary>
+        /// <param name="signInManager"></param>
+        /// <param name="userManager"></param>
         public AccountController(SignInManager<User> signInManager, UserManager<User> userManager)
         {
             _signInManager = signInManager;
@@ -33,7 +41,7 @@ namespace WebApplication4.Controllers
 
 
         [HttpPost]
-        public IActionResult Registration(RegistrationUserViewModel registrationUserViewModel)
+        public async Task<IActionResult> Registration(RegistrationUserViewModel registrationUserViewModel)
         {
 
             if (ModelState.IsValid)
@@ -45,11 +53,13 @@ namespace WebApplication4.Controllers
                 };
 
                 ///Добавление в БД
-                var result = _userManager.CreateAsync(user, registrationUserViewModel.Password);
+                var result = await _userManager.CreateAsync(user, registrationUserViewModel.Password);
 
                 ///Если всё ок прыгаем на главную
-                if (result.Result.Succeeded)
+                if (result.Succeeded)
                 {
+                    ///Здесь добавляются необходимые клаймы
+                    await _userManager.AddClaimAsync(user, new Claim(ClaimTypes.Role, "Manager"));
                     return RedirectToAction("Index", "Home");
                 }
             }
@@ -72,23 +82,32 @@ namespace WebApplication4.Controllers
         }
 
         /// <summary>
-        /// Если всё прошло успешно записываем нового пользователя
+        /// Если всё прошло успешно аутентифицируем нового пользователя
         /// </summary>
         /// <param name="userLoginViewModel"></param>
         /// <returns></returns>
         [HttpPost]
-        public IActionResult Login(UserLoginViewModel userLoginViewModel)
+        public async Task<IActionResult> Login(UserLoginViewModel userLoginViewModel)
         {
             if (ModelState.IsValid)
             {
 
-                var result = _signInManager.PasswordSignInAsync
-                    (userLoginViewModel.Email, userLoginViewModel.Password, true, false);
+                User user = await _userManager.FindByNameAsync(userLoginViewModel.Email);
 
-                if (result.Result.Succeeded)
+                if (user is null)
                 {
-                    return RedirectToAction("Index", "Home");
+                    ModelState.AddModelError("", "Пользователь не найден");
+
                 }
+
+
+                var result = await _signInManager.PasswordSignInAsync(user, userLoginViewModel.Password, true,false);
+
+                if (result.Succeeded)
+                {
+                    return RedirectToAction("Index","Home");
+                }
+                
 
                 ModelState.AddModelError("", "Неверный логин или пароль");
             }
@@ -97,6 +116,12 @@ namespace WebApplication4.Controllers
         }
 
         #endregion
+
+
+        public IActionResult AccessDenied()
+        {
+            return View();
+        }
 
         #region Выход
 
